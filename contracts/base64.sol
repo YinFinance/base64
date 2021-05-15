@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 
+pragma solidity >=0.7.6;
+
 /// @title Base64
 /// @author Brecht Devos - <brecht@loopring.org>
 /// @notice Provides a function for encoding some bytes in base64
@@ -8,7 +10,7 @@ library Base64 {
 
     function encode(bytes memory data) internal pure returns (string memory) {
         if (data.length == 0) return '';
-        
+
         // load the table into memory
         string memory table = TABLE;
 
@@ -21,25 +23,25 @@ library Base64 {
         assembly {
             // set the actual output length
             mstore(result, encodedLen)
-            
+
             // prepare the lookup table
             let tablePtr := add(table, 1)
-            
+
             // input ptr
             let dataPtr := data
             let endPtr := add(dataPtr, mload(data))
-            
+
             // result ptr, jump over length
             let resultPtr := add(result, 32)
-            
+
             // run over the input, 3 bytes at a time
             for {} lt(dataPtr, endPtr) {}
             {
                dataPtr := add(dataPtr, 3)
-               
+
                // read 3 bytes
                let input := mload(dataPtr)
-               
+
                // write 4 characters
                mstore(resultPtr, shl(248, mload(add(tablePtr, and(shr(18, input), 0x3F)))))
                resultPtr := add(resultPtr, 1)
@@ -50,13 +52,12 @@ library Base64 {
                mstore(resultPtr, shl(248, mload(add(tablePtr, and(        input,  0x3F)))))
                resultPtr := add(resultPtr, 1)
             }
-            
+
             // padding with '='
             switch mod(mload(data), 3)
             case 1 { mstore(sub(resultPtr, 2), shl(240, 0x3d3d)) }
             case 2 { mstore(sub(resultPtr, 1), shl(248, 0x3d)) }
         }
-        
         return result;
     }
 }
